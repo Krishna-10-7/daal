@@ -18,6 +18,8 @@
   ],
   "categories": [
     "Linters"
-  ]
+  ],
+  "dependencies": {
+    "krishna-project": "file:.."
+  }
 }
-
