@@ -1,8 +1,7 @@
 const vscode = require('vscode');
 const path = require('path');
 
-const enginePath = path.join(__dirname, '..', 'src', 'js', 'engine');
-const { analyzeYamlText } = require(enginePath);
+const { analyzeYamlText } = require('./engine');
 const timers = new Map();
 
 function isYamlDoc(doc) {
