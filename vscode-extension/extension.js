@@ -3,6 +3,7 @@ const path = require('path');
 
 const { analyzeYamlText } = require('./engine');
 const timers = new Map();
+let statusBarItem = null;
 
 function isYamlDoc(doc) {
     const ext = path.extname(doc.fileName || '').toLowerCase();
@@ -37,7 +38,68 @@ async function analyzeDocument(doc, collection) {
     }
 }
 
-function scheduleAnalyze(doc, collection) {
+    async function postJson(urlString, body, timeoutMs = 8000) {
+        const urlObj = new URL(urlString);
+        const isHttps = urlObj.protocol === 'https:';
+        const http = isHttps ? require('https') : require('http');
+
+        const payload = JSON.stringify(body);
+        const opts = {
+            method: 'POST',
+            hostname: urlObj.hostname,
+            port: urlObj.port || (isHttps ? 443 : 80),
+            path: urlObj.pathname + (urlObj.search || ''),
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(payload)
+            }
+        };
+
+        return new Promise((resolve, reject) => {
+            const req = http.request(opts, (res) => {
+                let data = '';
+                res.setEncoding('utf8');
+                res.on('data', (chunk) => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const parsed = JSON.parse(data || '{}');
+                        resolve(parsed);
+                    } catch (e) {
+                        reject(new Error('Invalid JSON from server'));
+                    }
+                });
+            });
+            req.on('error', (err) => reject(err));
+            if (timeoutMs) req.setTimeout(timeoutMs, () => { req.destroy(new Error('Request timeout')); });
+            req.write(payload);
+            req.end();
+        });
+    }
+
+    async function analyzeDocumentOnServer(doc, collection) {
+        if (!isYamlDoc(doc)) return;
+        try {
+            const config = vscode.workspace.getConfiguration('daal');
+            const serverUrl = config.get('serverUrl', 'http://localhost:3000/compile');
+            if (!serverUrl) return analyzeDocument(doc, collection);
+
+            statusBarItem && (statusBarItem.text = 'DAAL: Running...');
+
+            const payload = { text: doc.getText(), fileName: doc.fileName };
+            const res = await postJson(serverUrl, payload, 15000);
+            const diags = (res && res.diagnostics ? res.diagnostics : []).map(toVscodeDiag);
+            collection.set(doc.uri, diags);
+            statusBarItem && (statusBarItem.text = 'DAAL: Done');
+        } catch (e) {
+            const range = new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 1));
+            const d = new vscode.Diagnostic(range, 'DAAL server error: ' + (e.message || String(e)), vscode.DiagnosticSeverity.Error);
+            collection.set(doc.uri, [d]);
+            statusBarItem && (statusBarItem.text = 'DAAL: Error');
+            }
+
+        }
+
+    function scheduleAnalyze(doc, collection) {
     const key = doc.uri.toString();
     const existing = timers.get(key);
     if (existing) clearTimeout(existing);
@@ -52,12 +114,20 @@ function activate(context) {
     const collection = vscode.languages.createDiagnosticCollection('daal');
     context.subscriptions.push(collection);
 
+    // Create a status bar Run button
+    statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+    statusBarItem.text = 'DAAL: Ready';
+    statusBarItem.command = 'daal.runOnServer';
+    statusBarItem.tooltip = 'Run D.A.A.L analysis on configured server';
+    statusBarItem.show();
+    context.subscriptions.push(statusBarItem);
+
     if (vscode.window.activeTextEditor) {
         analyzeDocument(vscode.window.activeTextEditor.document, collection);
     }
 
     context.subscriptions.push(vscode.workspace.onDidOpenTextDocument((doc) => analyzeDocument(doc, collection)));
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((doc) => analyzeDocument(doc, collection)));
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument((doc) => analyzeDocumentOnServer(doc, collection)));
     context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e) => scheduleAnalyze(e.document, collection)));
     context.subscriptions.push(vscode.workspace.onDidCloseTextDocument((doc) => {
         const key = doc.uri.toString();
@@ -66,6 +136,15 @@ function activate(context) {
         timers.delete(key);
         collection.delete(doc.uri);
     }));
+
+    // Register command to run on server
+    const runCmd = vscode.commands.registerCommand('daal.runOnServer', async () => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) return vscode.window.showInformationMessage('Open a YAML file to run D.A.A.L on server');
+        const doc = editor.document;
+        await analyzeDocumentOnServer(doc, collection);
+    });
+    context.subscriptions.push(runCmd);
 }
 
 function deactivate() {}

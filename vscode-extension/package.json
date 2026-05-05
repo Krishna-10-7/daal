@@ -19,4 +19,32 @@
   "categories": [
     "Linters"
   ]
+  ,
+  "contributes": {
+    "configuration": {
+      "title": "D.A.A.L",
+      "properties": {
+        "daal.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3000/compile",
+          "description": "URL of the D.A.A.L server endpoint that accepts POST { text } and returns diagnostics. Leave empty to use local analysis."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "daal.runOnServer",
+        "title": "DAAL: Run on Server"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "daal.runOnServer",
+          "when": "editorLangId == yaml",
+          "group": "navigation"
+        }
+      ]
+    }
+  }
 }
