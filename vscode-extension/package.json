@@ -3,7 +3,7 @@
   "displayName": "D.A.A.L",
   "description": "D.A.A.L diagnostics for Kubernetes YAML",
   "version": "0.1.0",
-  "publisher": "krishna-2004",
+  "publisher": "krishnapandey",
   "license": "MIT",
   "repository": {
     "type": "git",
