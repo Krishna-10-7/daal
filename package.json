@@ -1,0 +1,22 @@
+{
+  "name": "daal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/js/server.js",
+    "build": "node-gyp rebuild",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "yaml-ast-parser": "^0.0.43"
+  },
+  "devDependencies": {
+    "node-gyp": "^12.3.0"
+  }
+}
