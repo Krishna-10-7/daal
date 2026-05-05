@@ -12,8 +12,12 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Krishna-10-7/daal.git"
+  },
   "dependencies": {},
   "devDependencies": {
     "node-gyp": "^12.3.0"
