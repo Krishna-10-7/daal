@@ -2,7 +2,7 @@
   "name": "krishna-project",
   "displayName": "D.A.A.L",
   "description": "D.A.A.L diagnostics for Kubernetes YAML",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "krishnapandey",
   "license": "MIT",
   "repository": {
@@ -26,8 +26,8 @@
       "properties": {
         "daal.serverUrl": {
           "type": "string",
-          "default": "http://localhost:3000/compile",
-          "description": "URL of the D.A.A.L server endpoint that accepts POST { text } and returns diagnostics. Leave empty to use local analysis."
+          "default": "https://r2-d2.xyz/compile",
+          "description": "URL of the D.A.A.L server endpoint. Default: Azure VM via Caddy HTTPS. Fallback: http://20.193.254.214:3000/compile or http://localhost:3000/compile for local testing."
         }
       }
     },
