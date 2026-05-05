@@ -95,11 +95,12 @@ async function analyzeDocument(doc, collection) {
             const d = new vscode.Diagnostic(range, 'DAAL server error: ' + (e.message || String(e)), vscode.DiagnosticSeverity.Error);
             collection.set(doc.uri, [d]);
             statusBarItem && (statusBarItem.text = 'DAAL: Error');
-            }
-
         }
 
-    function scheduleAnalyze(doc, collection) {
+    }
+
+function scheduleAnalyze(doc, collection) {
+function scheduleAnalyze(doc, collection) {
     const key = doc.uri.toString();
     const existing = timers.get(key);
     if (existing) clearTimeout(existing);
