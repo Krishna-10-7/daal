@@ -38,20 +38,19 @@ async function analyzeDocument(doc, collection) {
     }
 }
 
-    async function postJson(urlString, body, timeoutMs = 8000) {
+    async function postYaml(urlString, yamlText, timeoutMs = 8000) {
         const urlObj = new URL(urlString);
         const isHttps = urlObj.protocol === 'https:';
         const http = isHttps ? require('https') : require('http');
 
-        const payload = JSON.stringify(body);
         const opts = {
             method: 'POST',
             hostname: urlObj.hostname,
             port: urlObj.port || (isHttps ? 443 : 80),
             path: urlObj.pathname + (urlObj.search || ''),
             headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(payload)
+                'Content-Type': 'text/yaml',
+                'Content-Length': Buffer.byteLength(yamlText)
             }
         };
 
@@ -71,7 +70,7 @@ async function analyzeDocument(doc, collection) {
             });
             req.on('error', (err) => reject(err));
             if (timeoutMs) req.setTimeout(timeoutMs, () => { req.destroy(new Error('Request timeout')); });
-            req.write(payload);
+            req.write(yamlText);
             req.end();
         });
     }
@@ -85,8 +84,8 @@ async function analyzeDocument(doc, collection) {
 
             statusBarItem && (statusBarItem.text = 'DAAL: Running...');
 
-            const payload = { text: doc.getText(), fileName: doc.fileName };
-            const res = await postJson(serverUrl, payload, 15000);
+            const yamlText = doc.getText();
+            const res = await postYaml(serverUrl, yamlText, 15000);
             const diags = (res && res.diagnostics ? res.diagnostics : []).map(toVscodeDiag);
             collection.set(doc.uri, diags);
             statusBarItem && (statusBarItem.text = 'DAAL: Done');
@@ -99,7 +98,6 @@ async function analyzeDocument(doc, collection) {
 
     }
 
-function scheduleAnalyze(doc, collection) {
 function scheduleAnalyze(doc, collection) {
     const key = doc.uri.toString();
     const existing = timers.get(key);
