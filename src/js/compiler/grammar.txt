@@ -1,0 +1,17 @@
+# Context-Free Grammar for D.A.A.L (Kubernetes YAML Subset)
+# Non-Terminals are capitalized. Terminals are in UPPERCASE.
+
+Manifest     ::= Resource* EOF
+Resource     ::= ApiVersion Kind Metadata Spec
+ApiVersion   ::= 'apiVersion' COLON IDENTIFIER NEWLINE
+Kind         ::= 'kind' COLON IDENTIFIER NEWLINE
+Metadata     ::= 'metadata' COLON NEWLINE INDENT MetaFields DEDENT
+MetaFields   ::= Name (Namespace)? (Labels)? (Annotations)?
+Name         ::= 'name' COLON IDENTIFIER NEWLINE
+Namespace    ::= 'namespace' COLON IDENTIFIER NEWLINE
+Labels       ::= 'labels' COLON NEWLINE INDENT KeyValuePairs DEDENT
+Annotations  ::= 'annotations' COLON NEWLINE INDENT KeyValuePairs DEDENT
+Spec         ::= 'spec' COLON NEWLINE INDENT SpecFields DEDENT
+SpecFields   ::= KeyValuePairs
+KeyValuePairs::= (IDENTIFIER COLON (Value | NEWLINE INDENT KeyValuePairs DEDENT))*
+Value        ::= IDENTIFIER | STRING | INTEGER | BOOLEAN

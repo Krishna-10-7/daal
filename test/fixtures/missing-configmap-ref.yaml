@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+      volumes:
+        - name: cfg
+          configMap:
+            name: does-not-exist
+

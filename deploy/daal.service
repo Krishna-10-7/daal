@@ -1,0 +1,16 @@
+[Unit]
+Description=D.A.A.L backend
+After=network.target
+
+[Service]
+Type=simple
+User=daal
+WorkingDirectory=/opt/daal
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+ExecStart=/usr/bin/node /opt/daal/src/js/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
