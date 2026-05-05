@@ -1,9 +1,9 @@
 {
-  "name": "daal-vscode",
+  "name": "krishna-project",
   "displayName": "D.A.A.L",
   "description": "D.A.A.L diagnostics for Kubernetes YAML",
   "version": "0.1.0",
-  "publisher": "KrishnaPandey",
+  "publisher": "krishna-2004",
   "license": "MIT",
   "repository": {
     "type": "git",
